@@ -10,21 +10,21 @@ export const searchPerson = async (req, res) => {
     if (response.length === 0) {
       return res.status(404).json({ error: "No result found" });
     }
-    await User.findByIdAndUpdate(req.user._id, {
-      $push: {
-        searchHistory: {
-          id: response.results[0].id,
-          image: response.results[0].profile_path,
-          title: response.results[0].name,
-          searchType: "person",
-          createdAt: Date.now(),
-        },
-      },
+    const data = JSON.stringify({
+      id: response.results[0].id,
+      image: response.results[0].profile_path,
+      title: response.results[0].name,
+      searchType: "person",
+      createdAt: Date.now(),
     });
+    
+    const user = await User.findById(req.user._id)
+    user.searchHistory.push(data)
+    await user.save()
 
     return res.status(200).json({ content: response.results });
   } catch (error) {
-    console.log("Error in searchPerson controller");
+    console.log("Error in searchPerson controller", error);
     return res.status(500).json({ error: "Internal server Error" });
   }
 };
@@ -38,20 +38,20 @@ export const searchMovie = async (req, res) => {
     if (response.results.length === 0) {
       return res.status(404).send(null);
     }
-    await User.findByIdAndUpdate(req.user._id, {
-      $push: {
-        searchHistory: {
-          id: response.results[0].id,
-          image: response.results[0].poster_path,
-          title: response.results[0].title,
-          searchType: "Movie",
-          createdAt: Date.now(),
-        },
-      },
+    const data = JSON.stringify({
+      id: response.results[0].id,
+      image: response.results[0].poster_path,
+      title: response.results[0].title,
+      searchType: "Movie",
+      createdAt: Date.now(),
     });
+    
+    const user = await User.findById(req.user._id)
+    user.searchHistory.push(data)
+    await user.save()
     return res.status(200).json({ content: response.results });
   } catch (error) {
-    console.log("Error in searchMovie controller");
+    console.log("Error in searchMovie controller", error);
     return res.status(500).json({ error: "Internal server Error" });
   }
 };
@@ -65,17 +65,18 @@ export const searchTv = async (req, res) => {
     if (response.length === 0) {
       return res.status(404).send(null);
     }
-    await User.findByIdAndUpdate(req.user._id, {
-      $push: {
-        searchHistory: {
-          id: response.results[0].id,
-          image: response.results[0].poster_path,
-          title: response.results[0].title,
-          searchType: "Tv",
-          createdAt: Date.now(),
-        },
-      },
+    const data = JSON.stringify({
+      id: response.results[0].id,
+      image: response.results[0].poster_path,
+      title: response.results[0].title,
+      searchType: "Tv",
+      createdAt: Date.now(),
     });
+    
+    const user = await User.findById(req.user._id)
+    user.searchHistory.push(data)
+    await user.save()
+
     return res.status(200).json({ content: response.results });
   } catch (error) {
     console.log("error in searchtv controller");
@@ -94,8 +95,8 @@ export const getSearchHistory = async (req, res) => {
 
 export const deleteFromHistory = async (req, res) => {
   try {
-      let { id } = req.params;
-      id = parseInt(id)
+    let { id } = req.params;
+    id = parseInt(id);
     await User.findByIdAndUpdate(req.user._id, {
       $pull: {
         searchHistory: { id: id },

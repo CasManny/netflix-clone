@@ -44,7 +44,7 @@ export const getSimilarMovies = async (req, res) => {
     try {
         const { id } = req.params
         const data = await fetchTMDBMovies(`https://api.themoviedb.org/3/movie/${id}/similar?language=en-US&page=1`)
-        return res.status(200).json({content: data.results})
+        return res.status(200).json({similar: data.results})
         
     } catch (error) {
         console.log("error in getsimilarmovie controller")
